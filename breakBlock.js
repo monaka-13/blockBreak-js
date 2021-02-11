@@ -44,8 +44,17 @@ function draw(){
     if(x + dx > canvas.width - ballRadius || x + dx < 0 + ballRadius){
         dx = -dx;
     }
-    if(y + dy > canvas.height-ballRadius || y + dy < 0 + ballRadius){
+    if(y + dy < ballRadius){
         dy = -dy;
+    }else if(y + dy > canvas.height-ballRadius){
+        if(x > paddleX && x < paddleX + paddleWidth){
+            //パドルで弾けたとき
+            dy = -dy;
+        }else{
+            alert("GameOver");
+            document.location.reload();
+            clearInterval(interval);
+        }
     }
 
     if(rightPressed && paddleX < canvas.width-paddleWidth){
@@ -55,6 +64,7 @@ function draw(){
     }
 }
 
+//操作入力
 document.addEventListener("keydown", keyDownHandler, false);
 function keyDownHandler(e){
     if(e.key == "Right" || e.key == "ArrowRight") {
@@ -71,4 +81,4 @@ function keyUpHandler(e){
         leftPressed = false;
     }
 }
-setInterval(draw, 10);
+var interval = setInterval(draw, 10);
