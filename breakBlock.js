@@ -31,6 +31,8 @@ for(var c = 0; c < brickColumnCount; c++){
     }
 }
 
+var score = 0;
+
 function drawBall(){
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI*2);
@@ -71,7 +73,8 @@ function draw(){
     drawBricks();
     drawBall();
     drawPaddle();
-    collisionDetection()
+    drawScore();
+    collisionDetection();
 
     x += dx;
     y += dy;
