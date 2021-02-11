@@ -7,10 +7,12 @@ var y = canvas.height-30;
 var dx = 2;
 var dy = -2;
 
+var ballRadius = 10;
+
 function drawBall(){
     ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI*2);
-    ctx.fillStyle="#0095dd";
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+    ctx.fillStyle = "#0095dd";
     ctx.fill();
     ctx.closePath();
 }
@@ -21,6 +23,14 @@ function draw(){
     drawBall();
     x += dx;
     y += dy;
+
+    //衝突検知
+    if(x + dx > canvas.width - ballRadius || x + dx < 0 + ballRadius){
+        dx = -dx;
+    }
+    if(y + dy > canvas.height-ballRadius || y + dy < 0 + ballRadius){
+        dy = -dy;
+    }
 }
 
 setInterval(draw, 10);
