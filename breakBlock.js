@@ -7,7 +7,7 @@ var y = canvas.height-30;
 var dx = 2;
 var dy = -2;
 
-var ballRadius = 10;
+var ballRadius = 5;
 
 var paddleHeight = 10;
 var paddleWidth = 75;
@@ -32,6 +32,7 @@ for(var c = 0; c < brickColumnCount; c++){
 }
 
 var score = 0;
+var lives = 3;
 
 function drawBall(){
     ctx.beginPath();
@@ -67,6 +68,18 @@ function drawBricks(){
     }
 }
 
+function drawScore(){
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095dd";
+    ctx.fillText("Score: "+score, 8, 20);
+}
+
+function drawLives(){
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095dd";
+    ctx.fillText("Lives: "+lives, 420, 20);
+}
+
 function draw(){
     //描画コード
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -74,6 +87,7 @@ function draw(){
     drawBall();
     drawPaddle();
     drawScore();
+    drawLives();
     collisionDetection();
 
     x += dx;
@@ -90,9 +104,17 @@ function draw(){
             //パドルで弾けたとき
             dy = -dy;
         }else{
-            alert("GameOver");
-            document.location.reload();
-            clearInterval(interval);
+            lives--;
+            if(!lives){
+                alert("GameOver");
+                document.location.reload();
+            }else{
+                x = canvas.width/2;
+                y = canvas.height-30;
+                dx = 2;
+                dy = -2;
+                paddleX = (canvas.width-paddleWidth)/2;
+            }
         }
     }
 
@@ -101,6 +123,8 @@ function draw(){
     }else if(leftPressed && paddleX > 0){
         paddleX -= 7;
     }
+
+    requestAnimationFrame(draw);
 }
 
 //操作入力
@@ -148,11 +172,4 @@ function collisionDetection(){
     }
 }
 
-function drawScore(){
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#0095dd";
-    ctx.fillText("Score: "+score, 8, 20);
-}
-
-var interval = setInterval(draw, 10);
-
+draw();
