@@ -31,13 +31,17 @@ for(var i=0;i<lives;i++){//ライフ初期生成
     life+=("♥");
 }
 
+var items = [];
+var itemCount = 0;
 
 var bricks = [];//ブロック生成
 for(var c=0; c<brickColumnCount; c++) {
     bricks[c] = [];
     for(var r = 0; r<brickRowCount; r++) {
         if(c == 2 && (r == 2 || r == 4)){
-            bricks[c][r] = { x: 0, y: 0, status:3, item: 2};
+            bricks[c][r] = { x: 0, y: 0, status:3, item: itemCount};
+            items[itemCount] = {col: c, row: r, itemX: 0, itemY: 0, itemStatus: 0, type: "life"}
+            itemCount++;
         }else if(r == 1 || r == 4){
             bricks[c][r] = { x: 0, y: 0, status:2 };
         }else{
@@ -45,10 +49,29 @@ for(var c=0; c<brickColumnCount; c++) {
         }
     }
 }
-
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
+
+function draw(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBall();
+    drawPaddle();
+    drawBricks();
+    drawItems();
+    drawRemain();
+    drawLives();
+    collisionDetection();
+    wallBound();
+    paddleBound();
+    pressKey();
+
+
+    x += dx;
+    y += dy;
+
+    requestAnimationFrame(draw);
+}
 
 function drawBall(){//ボール描画
     ctx.beginPath();
@@ -74,6 +97,7 @@ function drawBricks() {//ブロック描画
                 var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
                 bricks[c][r].x = brickX;
                 bricks[c][r].y = brickY;
+                bricks[c][r].item
 
                 ctx.beginPath();
                 ctx.rect(brickX, brickY, brickWidth, brickHeight);
@@ -90,6 +114,20 @@ function drawBricks() {//ブロック描画
         }
     }
 }
+function drawItems(){
+    for(var i = 0; i < itemCount -1; i++){
+        if(items[i].itemStatus == 1){
+            var item = items[i];
+            item.x=bricks[item.col][item.row].x;
+            item.y=bricks[item.col][item.row].y;
+            ctx.beginPath();
+            ctx.arc(100, 100, 0, Math.PI*2);
+            ctx.fillStyle = "purple";
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+}
 
 function drawRemain(){//残り時間描画
     ctx.font = "16px Arial";
@@ -102,14 +140,35 @@ function drawLives(){//ライフ描画
     ctx.fillText(life, 440, 20);
 }
 
-function draw(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBall();
-    drawPaddle();
-    drawRemain();
-    drawLives();
-    drawBricks();
-    collisionDetection();
+
+
+function collisionDetection() {//衝突検知
+    for(var c=0; c<brickColumnCount; c++) {
+        for(var r=0; r<brickRowCount; r++) {
+            var b = bricks[c][r];
+            if(b.status>1){
+                if (x+bound > b.x && x-bound < b.x+brickWidth && y+bound > b.y && y-bound < b.y+brickHeight) {
+                    dy = -dy;
+                    if(b.status==3){//アイテム生成
+                        items[b.item].itemStatus = 1;
+                    }
+                    b.status--;
+                }
+            }else if(b.status == 1){
+                if (x+bound > b.x && x-bound < b.x+brickWidth && y+bound > b.y && y-bound < b.y+brickHeight) {
+                    dy = -dy;
+                    b.status = 0;
+                    remain--;
+                    if(remain == 0){
+                        alert("YOU WIN!");
+                        document.location.reload();
+                    }
+                }
+            }
+        }
+    }
+}
+function wallBound(){
     if(x + dx - bound < 0 || x + dx + bound > canvas.width){//横壁
         dx = -dx;
     }
@@ -133,7 +192,8 @@ function draw(){
             paddleX = (canvas.width-paddleWidth)/2;
         }
     }
-
+}
+function paddleBound(){
     //バーのバウンド
     if(y==paddleY){
         if((x > paddleX && x < paddleX + paddleWidth * 0.1)||(x > paddleX + paddleWidth * 0.9 && x < paddleX + paddleWidth)){
@@ -153,7 +213,8 @@ function draw(){
             }
         }
     }
-
+}
+function pressKey(){
     //キー操作
     if(rightPressed) {
         paddleX += 3;
@@ -161,41 +222,7 @@ function draw(){
     else if(leftPressed) {
         paddleX -= 3;
     }
-
-    x += dx;
-    y += dy;
-
-    requestAnimationFrame(draw);
 }
-
-function collisionDetection() {//衝突検知
-    for(var c=0; c<brickColumnCount; c++) {
-        for(var r=0; r<brickRowCount; r++) {
-            var b = bricks[c][r];
-            if(b.status>1){
-                if (x+bound > b.x && x-bound < b.x+brickWidth && y+bound > b.y && y-bound < b.y+brickHeight) {
-                    dy = -dy;
-                    if(b.status==2){//アイテム生成
-                        console.log("drawItem");
-                    }
-                    b.status--;
-                }
-            }else if(b.status == 1){
-                if (x+bound > b.x && x-bound < b.x+brickWidth && y+bound > b.y && y-bound < b.y+brickHeight) {
-                    dy = -dy;
-                    b.status = 0;
-                    remain--;
-                    if(remain == 0){
-                        alert("YOU WIN!");
-                        document.location.reload();
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 function keyDownHandler(e) {
     if(e.key == "Right" || e.key == "ArrowRight") {
         rightPressed = true;
