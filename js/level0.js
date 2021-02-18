@@ -1,27 +1,27 @@
+//config
+var dx = 2;//角度
+var dy = -2;//角度
+var ballRadius = 5;//ボールの大きさ
+var paddleHeight = 10;//パドルの高さ
+var paddleWidth = 75;//パドルの幅
+var brickRowCount = 3;//ブロックの横の数
+var brickColumnCount = 5;//ブロックの縦の数
+var brickWidth = 75;//ブロックの幅
+var brickHeight = 20;//ブロックの高さ
+var brickPadding = 10;//ブロックの間隔
+var brickOffsetTop = 30;//ブロック配置位置
+var brickOffsetLeft = 30;//ブロック配置位置
+var blockRemain = brickRowCount * brickColumnCount;
+var lives = 3;//life
+
+//common config
 var canvas = document.getElementById("myCanvas");
- //2D描画コンテキストを保存
 var ctx = canvas.getContext("2d");
-
-var x = canvas.width/2;
-var y = canvas.height-30;
-var dx = 2;
-var dy = -2;
-
-var ballRadius = 5;
-
-var paddleHeight = 10;
-var paddleWidth = 75;
-var paddleX = (canvas.width - paddleWidth) / 2;
+var x = canvas.width/2;//ボール開始位置
+var y = canvas.height-30;//ボール開始位置
+var paddleX = (canvas.width - paddleWidth) / 2;//パドル開始位置
 var rightPressed = false;
 var leftPressed = false;
-
-var brickRowCount = 3;
-var brickColumnCount = 5;
-var brickWidth = 75;
-var brickHeight = 20;
-var brickPadding = 10;
-var brickOffsetTop = 30;
-var brickOffsetLeft = 30;
 
 var bricks = [];
 for(var c = 0; c < brickColumnCount; c++){
@@ -31,8 +31,6 @@ for(var c = 0; c < brickColumnCount; c++){
     }
 }
 
-var score = 0;
-var lives = 3;
 
 function drawBall(){
     ctx.beginPath();
@@ -68,10 +66,10 @@ function drawBricks(){
     }
 }
 
-function drawScore(){
+function drawRemain(){
     ctx.font = "16px Arial";
     ctx.fillStyle = "#0095dd";
-    ctx.fillText("Score: "+score, 8, 20);
+    ctx.fillText("blockRemain: "+blockRemain, 8, 20);
 }
 
 function drawLives(){
@@ -86,7 +84,7 @@ function draw(){
     drawBricks();
     drawBall();
     drawPaddle();
-    drawScore();
+    drawRemain();
     drawLives();
     collisionDetection();
 
@@ -160,8 +158,8 @@ function collisionDetection(){
                 if(x > b.x && x < b.x+brickWidth && y > b.y && y < b. y+brickHeight) {
                     dy = -dy;
                     b.status = 0;
-                    score++;
-                    if(score == brickRowCount*brickColumnCount){
+                    blockRemain--;
+                    if(blockRemain == 0){
                         alert("YouWin");
                         document.location.reload();
                         clearInterval(interval);
