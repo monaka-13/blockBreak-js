@@ -31,24 +31,6 @@ for(var i=0;i<lives;i++){//ライフ初期生成
     life+=("♥");
 }
 
-var items = [];
-var itemCount = 0;
-
-var bricks = [];//ブロック生成
-for(var c=0; c<brickColumnCount; c++) {
-    bricks[c] = [];
-    for(var r = 0; r<brickRowCount; r++) {
-        if(c == 2 && (r == 2 || r == 4)){
-            bricks[c][r] = { x: 0, y: 0, status:3, item: itemCount};
-            items[itemCount] = {col: c, row: r, itemX: 0, itemY: 0, itemStatus: 0, type: "life"}
-            itemCount++;
-        }else if(r == 1 || r == 4){
-            bricks[c][r] = { x: 0, y: 0, status:2 };
-        }else{
-            bricks[c][r] = { x: 0, y: 0, status:1 };
-        }
-    }
-}
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
@@ -64,11 +46,10 @@ function draw(){
     collisionDetection();
     wallBound();
     paddleBound();
+    getItem();
     pressKey();
 
 
-    x += dx;
-    y += dy;
 
     requestAnimationFrame(draw);
 }
@@ -79,6 +60,9 @@ function drawBall(){//ボール描画
     ctx.fillStyle = ballColor;
     ctx.fill();
     ctx.closePath();
+    x += dx;
+    y += dy;
+
 }
 
 function drawPaddle() {//パドル描画
@@ -89,15 +73,40 @@ function drawPaddle() {//パドル描画
     ctx.closePath();
 }
 
+
+var items = [];
+var itemCount = 0;
+
+var bricks = [];//ブロック生成
+for(var c=0; c < brickColumnCount; c++) {
+    bricks[c] = [];
+    for(var r = 0; r<brickRowCount; r++) {
+        var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+        var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+
+
+        if(c == 2 && (r == 2 || r == 4)){
+            bricks[c][r] = { x: brickX, y: brickY, status:3, item: itemCount};
+            var ix = bricks[c][r].x + brickWidth/2;
+            var iy = bricks[c][r].y + brickHeight/2;
+            items[itemCount] = {col: c, row: r, itemX: ix, itemY: iy, itemStatus: 0, type: "life"}
+            itemCount++;
+        }else if(r == 1){
+            bricks[c][r] = { x: brickX, y: brickY, status:2 };
+        }else{
+            bricks[c][r] = { x: brickX, y: brickY, status:1 };
+        }
+    }
+}
+
 function drawBricks() {//ブロック描画
-    for(var c=0; c<brickColumnCount; c++) {
-        for(var r=0; r<brickRowCount; r++) {
+    for(var c = 0; c < brickColumnCount; c++) {
+        for(var r = 0; r < brickRowCount; r++) {
             if(bricks[c][r].status > 0){
                 var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
                 var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
                 bricks[c][r].x = brickX;
                 bricks[c][r].y = brickY;
-                bricks[c][r].item
 
                 ctx.beginPath();
                 ctx.rect(brickX, brickY, brickWidth, brickHeight);
@@ -114,19 +123,31 @@ function drawBricks() {//ブロック描画
         }
     }
 }
+
+
 function drawItems(){
-    for(var i = 0; i < itemCount -1; i++){
+    for(var i = 0; i < itemCount; i++){
         if(items[i].itemStatus == 1){
             var item = items[i];
-            item.x=bricks[item.col][item.row].x;
-            item.y=bricks[item.col][item.row].y;
             ctx.beginPath();
-            ctx.arc(100, 100, 0, Math.PI*2);
+            ctx.arc(item.itemX, item.itemY, 10, 0, Math.PI*2);
             ctx.fillStyle = "purple";
             ctx.fill();
             ctx.closePath();
+            item.itemY += 2;
+            if(item.itemY >= canvas.height){
+                item.itemStatus = 0;
+            }
+            if(item.itemY==paddleY){
+                if(item.itemX > paddleX && x < item.itemX + paddleWidth){
+                    item.itemStatus = 2;
+                }
+            }
         }
     }
+}
+function getItem(){
+
 }
 
 function drawRemain(){//残り時間描画
@@ -140,14 +161,12 @@ function drawLives(){//ライフ描画
     ctx.fillText(life, 440, 20);
 }
 
-
-
 function collisionDetection() {//衝突検知
     for(var c=0; c<brickColumnCount; c++) {
         for(var r=0; r<brickRowCount; r++) {
             var b = bricks[c][r];
-            if(b.status>1){
-                if (x+bound > b.x && x-bound < b.x+brickWidth && y+bound > b.y && y-bound < b.y+brickHeight) {
+            if(b.status > 1){
+                if (x + bound > b.x && x - bound < b.x + brickWidth && y + bound > b.y && y - bound < b.y + brickHeight) {
                     dy = -dy;
                     if(b.status==3){//アイテム生成
                         items[b.item].itemStatus = 1;
@@ -155,7 +174,7 @@ function collisionDetection() {//衝突検知
                     b.status--;
                 }
             }else if(b.status == 1){
-                if (x+bound > b.x && x-bound < b.x+brickWidth && y+bound > b.y && y-bound < b.y+brickHeight) {
+                if (x + bound > b.x && x - bound < b.x + brickWidth && y + bound > b.y && y - bound < b.y + brickHeight) {
                     dy = -dy;
                     b.status = 0;
                     remain--;
