@@ -215,9 +215,16 @@ function wallBound(){
 function paddleBound(){
     //バーのバウンド
     if(y==paddleY){
-        if((x > paddleX && x < paddleX + paddleWidth * 0.1)||(x > paddleX + paddleWidth * 0.9 && x < paddleX + paddleWidth)){
-            dx = dx * 0.5;
-            dy = -dy * 0.5;
+        if((x > paddleX && x < paddleX + paddleWidth * 0.2)||(x > paddleX + paddleWidth * 0.8 && x < paddleX + paddleWidth)){
+            var temp = dx;
+            if(dx>0){//x=+,y=+
+                dx = dy * 1;
+                dy = -temp *0.5;
+            }else if(dx<0){//x=-,y=+
+                dx = -dy * 1;
+                dy = temp * 0.5;
+            }
+
         }else if(x > paddleX && x < paddleX + paddleWidth){
             if (dy >= 2){
                 dx = dx * 1.05;
