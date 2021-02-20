@@ -7,3 +7,18 @@ canvas {
     display: block;
     margin: 0 auto;
 }
+.center{
+    text-align: center;
+}
+.brown{
+    background-color: #b87333;
+}
+.green{
+    background-color: #00cc00;
+}
+.red{
+    background-color: red;
+}
+.purple{
+    color:purple
+}
